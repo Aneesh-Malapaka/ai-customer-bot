@@ -11,12 +11,6 @@ const App = () => {
   const [chatHistory, setChatHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // inislize your Gemeni Api
-  const genAI = new GoogleGenerativeAI(
-    "AIzaSyBT7jIJOd1OfvQGnGyCUUFVKh2QtCudpEg"
-  );
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
   // Function to handle user input
   const handleUserInput = (e) => {
     setUserInput(e.target.value);
@@ -29,14 +23,21 @@ const App = () => {
     setIsLoading(true);
     try {
       // call Gemini Api to get a response
-      const result = await model.generateContent(userInput);
-      const response = await result.response;
-      console.log(response);
+      const response = await fetch("http://localhost:5000/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ user_input: userInput }),
+      });
+
+      const responseText = await response.json();
+      console.log(responseText);
       // add Gemeni's response to the chat history
       setChatHistory([
         ...chatHistory,
         { type: "user", message: userInput },
-        { type: "bot", message: response.text() },
+        { type: "bot", message: responseText.message },
       ]);
     } catch {
       console.error("Error sending message");
@@ -55,7 +56,7 @@ const App = () => {
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold text-center mb-4">Chatbot</h1>
 
-      <div className="chat-container rounded-lg shadow-md p-4">
+      <div className="chat-container rounded-lg shadow-md p-4 flex flex-col gap-5">
         <ChatHistory chatHistory={chatHistory} />
         <Loading isLoading={isLoading} />
       </div>
