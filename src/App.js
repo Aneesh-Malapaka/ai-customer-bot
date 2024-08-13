@@ -22,7 +22,7 @@ const App = () => {
     try {
       // call Gemini Api to get a response
       const response = await fetch("https://ai-customer-bot-server.vercel.app/", {
-        method: "POST",
+        method: ["POST", "OPTIONS"],
         headers: {
           "Content-Type": "application/json",
         },
