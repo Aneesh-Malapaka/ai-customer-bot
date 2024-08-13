@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
 // Style components using Tailwind CSS
 import "./App.css";
 import ChatHistory from "./component/ChatHistory";
@@ -34,13 +32,31 @@ const App = () => {
       const responseText = await response.json();
       console.log(responseText);
       // add Gemeni's response to the chat history
+      let parsedMessage = responseText, finalResponse="";
+    
+      if(parsedMessage.orders||parsedMessage.order){
+        if(parsedMessage.orders){
+          parsedMessage.orders.forEach(
+            (message)=>{
+              console.log(message)
+              finalResponse +=message.response+" "
+            }
+          )
+        }
+        else{
+          finalResponse = parsedMessage.order.response
+        }
+      }
+      else{
+        finalResponse = parsedMessage.message
+      }
       setChatHistory([
         ...chatHistory,
         { type: "user", message: userInput },
-        { type: "bot", message: responseText.message },
+        { type: "bot", message: finalResponse },
       ]);
-    } catch {
-      console.error("Error sending message");
+    } catch(e) {
+      console.error("Error sending message", e);
     } finally {
       setUserInput("");
       setIsLoading(false);
@@ -54,9 +70,9 @@ const App = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-center mb-4">Chatbot</h1>
+      <h1 className="text-3xl font-bold text-center mb-4">Cloud Restaurant Customer Service</h1>
 
-      <div className="chat-container rounded-lg shadow-md p-4 flex flex-col gap-5">
+      <div className="chat-container rounded-lg shadow-md p-4 flex flex-col gap-5 max-w-screen-lg max-h-96 overflow-y-scroll my-10 mx-auto">
         <ChatHistory chatHistory={chatHistory} />
         <Loading isLoading={isLoading} />
       </div>
